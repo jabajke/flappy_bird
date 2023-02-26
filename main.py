@@ -5,6 +5,11 @@ pygame.init()
 WIDTH, HEIGHT = 800, 600
 FPS = 60
 
+background_image = pygame.image.load('images/background.png')
+bird_image = pygame.image.load('images/bird.png')
+top_pipe_image = pygame.image.load('images/top_pipe.png')
+bottom_pipe_image = pygame.image.load('images/bottom_pipe.png')
+
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
@@ -12,8 +17,9 @@ py, sy, ay = HEIGHT // 2, 0, 0
 player = pygame.Rect(WIDTH // 3, py, 50, 50)
 state = 'start'
 timer = 0
-
+frame = 0
 pipes = []
+bg_list = [pygame.Rect(0, 0, 288, 600)]
 
 while True:
     for event in pygame.event.get():
@@ -24,8 +30,18 @@ while True:
 
     if timer > 0:
         timer -= 1
+    frame = (frame + 0.2) % 4
 
-    for pipe in pipes:
+    for i in range(len(bg_list) - 1, -1, -1):
+        bg = bg_list[i]
+        bg.x -= 1
+        if bg.right < 0:
+            bg_list.remove(bg)
+        if bg_list[-1].right < WIDTH:
+            bg_list.append(pygame.Rect(bg_list[-1].right, 0, 288, 600))
+
+    for i in range(len(pipes) - 1, -1, -1):
+        pipe = pipes[i]
         pipe.x -= 3
 
         if pipe.right < 0:
@@ -65,9 +81,13 @@ while True:
         pass
 
     screen.fill(pygame.Color('black'))
+
+    for bg in bg_list:
+        screen.blit(background_image, bg)
+
     for pipe in pipes:
         pygame.draw.rect(screen, pygame.Color('green'), pipe)
-    pygame.draw.rect(screen, pygame.Color('yellow'), player)
+    image = bird_image.subsurface(34 * int(frame), 0, 34, 24)
+    screen.blit(image, player)
     pygame.display.update()
     clock.tick(FPS)
-
