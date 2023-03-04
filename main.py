@@ -21,6 +21,11 @@ frame = 0
 pipes = []
 bg_list = [pygame.Rect(0, 0, 288, 600)]
 
+font1 = pygame.font.Font(None, 35)
+font2 = pygame.font.Font(None, 80)  # pip install pygame
+
+lives = 3
+score = 0
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -58,7 +63,7 @@ while True:
         else:
             ay = 0
         py += sy
-        sy = (sy + ay + 1) * 0.98
+        sy = (sy + ay + 0.5) * 0.98
         player.y = py
 
         if len(pipes) == 0 or pipes[-1].x < WIDTH - 200:
@@ -75,8 +80,14 @@ while True:
     elif state == 'fall':
         sy, ay = 0, 0
         timer = 30
-        pipes = []
-        state = 'start'
+        lives -= 1
+        if lives > 0:
+            state = 'start'
+            pipes = []
+        else:
+            lives = 0
+            state = 'game over'
+
     else:
         pass
 
@@ -86,8 +97,21 @@ while True:
         screen.blit(background_image, bg)
 
     for pipe in pipes:
-        pygame.draw.rect(screen, pygame.Color('green'), pipe)
+        if pipe.y == 0:
+            rect = top_pipe_image.get_rect(bottomleft=pipe.bottomleft)
+            screen.blit(top_pipe_image, rect)
+        else:
+            rect = bottom_pipe_image.get_rect(topleft=pipe.topleft)
+            screen.blit(bottom_pipe_image, rect)
+
     image = bird_image.subsurface(34 * int(frame), 0, 34, 24)
     screen.blit(image, player)
+
+    text = font1.render('Очки: {}'.format(score), True, pygame.Color('black'))
+    screen.blit(text, (10, 10))
+
+    text = font1.render('Жизни: {}'.format(lives), True, pygame.Color('black'))
+    screen.blit(text, (10, HEIGHT - 30))
+
     pygame.display.update()
     clock.tick(FPS)
